@@ -1,0 +1,18 @@
+
+
+Day 5 Task: Context Engineering
+
+## 1. Prompt A (Without Context)
+* **Output Screenshot/Text:** [Yahan Prompt A ka jo response aaya tha, usko paste karein ya uski image lagayein]
+
+## 2. Prompt B (With Context)
+* **Output Screenshot/Text:** [Yahan Prompt B ka jo customized response aaya, use paste karein]
+
+## 3. Comparison & Observations
+Claude ke diye gaye comparison ke answers yahan likhein:
+1. **Which roadmap feels more personalized?**
+   * Prompt B wala roadmap zyada personalized laga kyunki usme mere skills (Kotlin, Android) aur goals ke mutabik tasks the.
+2. **Which roadmap would you actually follow?**
+   * Main Prompt B wale roadmap ko follow karunga/karungi kyunki yeh mere real schedule aur target ke hisab se bana hai.
+3. **What role did context play in improving the result?**
+   * Context dene se AI ko clear direction mili, jisse usne generic roadmap dene ke bajaye ek functional aur specific plan taiyar kiya.
