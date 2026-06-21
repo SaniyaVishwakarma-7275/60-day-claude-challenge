@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌍 Personal Environmental Health Analyzer</title>
+    <!-- Tailwind CSS for Premium Dark Theme UI -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Chart.js for Interactive Data Visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b0f19;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #111827;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #374151;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="text-gray-100 min-h-screen flex flex-col custom-scrollbar">
+
+    <!-- HEADER -->
+    <header class="border-b border-gray-800 bg-gray-900/50 backdrop-blur-md sticky top-0 z-50 px-4 py-3 lg:px-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-emerald-500 to-cyan-500 p-2.5 rounded-xl shadow-lg shadow-emerald-500/10">
+                <i class="fa-solid to-black fa-earth-asia text-xl text-gray-900"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight bg-gradient-to-r from-emerald-400 via-cyan-400 to-blue-500 bg-clip-text text-transparent">Environmental Health Analyzer</h1>
+                <p class="text-xs text-gray-400">Real-time Analytics & Personal Bio-Risk Assessment</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+            <span class="text-xs bg-gray-800 border border-gray-700 px-3 py-1.5 rounded-lg text-gray-400 flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Region: North India
+            </span>
+            <button onclick="shareToLinkedIn()" class="bg-[#0077b5] hover:bg-[#006297] text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-2 shadow-md cursor-pointer">
+                <i class="fa-brands fa-linkedin text-sm"></i> Share Insights
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN LAYOUT -->
+    <main class="flex-1 p-4 lg:p-8 grid grid-cols-1 xl:grid-cols-4 gap-6 max-w-[1600px] w-full mx-auto">
+        
+        <!-- SIDEBAR CONTROLS & FILTERS -->
+        <div class="xl:col-span-1 space-y-6">
+            <!-- Filter Card -->
+            <div class="bg-gray-900/60 border border-gray-800/80 rounded-2xl p-5 backdrop-blur-sm shadow-xl">
+                <div class="flex items-center gap-2 mb-4 text-emerald-400 font-semibold text-sm tracking-wide uppercase">
+                    <i class="fa-solid fa-sliders"></i> Control Panel
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- City Selector -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Primary Focus City</label>
+                        <select id="citySelector" onchange="updateDashboard()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                            <!-- Populated via Javascript -->
+                        </select>
+                    </div>
+
+                    <!-- Pollutant Selector -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Primary Pollutant Metric</label>
+                        <select id="pollutantSelector" onchange="updateCharts()" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-emerald-500 cursor-pointer">
+                            <option value="aqi">AQI (Overall Index)</option>
+                            <option value="pm25">PM2.5 (Fine Particulates)</option>
+                            <option value="pm10">PM10 (Coarse Particulates)</option>
+                        </select>
+                    </div>
+
+                    <!-- Health Risk Filter -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-400 mb-1.5">Filter Cities by Max Risk</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setRiskFilter('all')" id="riskBtn-all" class="risk-btn text-xs py-2 px-1 rounded-lg border font-medium transition-all bg-emerald-500/10 border-emerald-500/30 text-emerald-400">All</button>
+                            <button onclick="setRiskFilter('moderate')" id="riskBtn-moderate" class="risk-btn text-xs py-2 px-1 rounded-lg border font-medium transition-all bg-gray-950 border-gray-800 text-gray-400 hover:bg-gray-800/50">Moderate</button>
+                            <button onclick="setRiskFilter('high')" id="riskBtn-high" class="risk-btn text-xs py-2 px-1 rounded-lg border font-medium transition-all bg-gray-950 border-gray-800 text-gray-400 hover:bg-gray-800/50">High Risk</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Focus City Breakdown Card -->
+            <div id="cityDetailCard" class="bg-gray-900/60 border border-gray-800/80 rounded-2xl p-5 backdrop-blur-sm shadow-xl relative overflow-hidden">
+                <!-- Dynamically filled by JS -->
+            </div>
+        </div>
+
+        <!-- MAIN DASHBOARD CONTENT -->
+        <div class="xl:col-span-3 space-y-6">
+            
+            <!-- EXECUTIVE SUMMARY BANNER -->
+            <div class="bg-gradient-to-r from-gray-900 via-slate-900 to-gray-900 border border-gray-800 rounded-2xl p-5 shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="space-y-1">
+                    <h3 class="text-sm font-semibold uppercase tracking-wider text-cyan-400">Executive Summary</h3>
+                    <p id="executiveSummaryText" class="text-sm text-gray-300 leading-relaxed max-w-3xl">
+                        Loading localized regional analysis report...
+                    </p>
+                </div>
+                <div class="bg-gray-950/80 border border-gray-800 px-4 py-2.5 rounded-xl shrink-0 text-center">
+                    <span class="block text-[10px] text-gray-400 font-medium uppercase tracking-wider">Analyzed Scope</span>
+                    <span id="citiesAnalyzedCount" class="text-xl font-bold text-gray-100">0 Cities</span>
+                </div>
+            </div>
+
+            <!-- KEY PERFORMANCE METRICS -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-gray-900/60 border border-gray-800/80 rounded-xl p-4 flex items-center gap-3.5">
+                    <div class="p-3 rounded-lg bg-blue-500/10 text-blue-400"><i class="fa-solid fa-calculator text-lg"></i></div>
+                    <div>
+                        <span class="block text-xs text-gray-400 font-medium">Regional Avg AQI</span>
+                        <span id="statAvgAqi" class="text-xl font-bold">-</span>
+                    </div>
+                </div>
+                <div class="bg-gray-900/60 border border-gray-800/80 rounded-xl p-4 flex items-center gap-3.5">
+                    <div class="p-3 rounded-lg bg-rose-500/10 text-rose-400"><i class="fa-solid fa-triangle-exclamation text-lg"></i></div>
+                    <div>
+                        <span class="block text-xs text-gray-400 font-medium">Highest AQI Zone</span>
+                        <span id="statMaxCity" class="text-sm font-bold block truncate max-w-[120px]">-</span>
+                    </div>
+                </div>
+                <div class="bg-gray-900/60 border border-gray-800/80 rounded-xl p-4 flex items-center gap-3.5">
+                    <div class="p-3 rounded-lg bg-emerald-500/10 text-emerald-400"><i class="fa-solid fa-leaf text-lg"></i></div>
+                    <div>
+                        <span class="block text-xs text-gray-400 font-medium">Cleanest Haven</span>
+                        <span id="statMinCity" class="text-sm font-bold block truncate max-w-[120px]">-</span>
+                    </div>
+                </div>
+                <div class="bg-gray-900/60 border border-gray-800/80 rounded-xl p-4 flex items-center gap-3.5">
+                    <div class="p-3 rounded-lg bg-purple-500/10 text-purple-400"><i class="fa-solid fa-heart-pulse text-lg"></i></div>
+                    <div>
+                        <span class="block text-xs text-gray-400 font-medium">Health Index Score</span>
+                        <span id="statHealthScore" class="text-xl font-bold">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VISUALIZATIONS SECTION -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Analytics Chart Card -->
+                <div class="lg:col-span-2 bg-gray-900/60 border border-gray-800/80 rounded-2xl p-5 shadow-xl">
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-300">Comparative Pollution Analysis</h4>
+                        <span class="text-xs text-gray-500">Interactive Analytics View</span>
+                    </div>
+                    <div class="h-[280px] w-full relative">
+                        <canvas id="analyticsChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Distribution / Ranking Card -->
+                <div class="bg-gray-900/60 border border-gray-800/80 rounded-2xl p-5 shadow-xl flex flex-col">
+                    <h4 class="text-sm font-semibold uppercase tracking-wider text-gray-300 mb-3">Regional Risk Stratification</h4>
+                    <div class="flex-1 h-[240px] w-full relative flex items-center justify-center">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BIO-HEALTH AND PATHOLOGY IMPACTS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Respiratory & Internal Health -->
+                <div class="bg-gray-900/60 border border-gray-800/80 rounded-2xl p-5 shadow-xl space-y-4">
+                    <h4 class="text-sm font-semibold uppercase tracking-wider text-orange-400 flex items-center gap-2">
+                        <i class="fa-solid fa-lungs"></i> Pulmonary & Physiological Impact
+                    </h4>
+                    <div id="airHealthImpacts" class="space-y-3">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+
+                <!-- Hair, Scalp & Dermatological Risks -->
+                <div class="bg-gray-900/60 border border-gray-800/80 rounded-2xl p-5 shadow-xl space-y-4">
+                    <h4 class="text-sm font-semibold uppercase tracking-wider text-cyan-400 flex items-center gap-2">
+                        <i class="fa-solid fa-spa"></i> Dermatological & Hair Pathology
+                    </h4>
+                    <div id="waterHealthImpacts" class="space-y-3">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- BIOMETRIC REPORT CARD & PERSONAL RECOMMENDATIONS -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Personal Report Card -->
+                <div id="personalReportCard" class="bg-gradient-to-b from-gray-900 via-gray-900 to-slate-950 border border-gray-800 rounded-2xl p-5 shadow-xl relative overflow-hidden">
+                    <!-- Dynamic -->
+                </div>
+
+                <!-- Insights & Recommendations Panel -->
+                <div class="lg:col-span-2 bg-gray-900/60 border border-gray-800/80 rounded-2xl p-5 shadow-xl flex flex-col justify-between">
+                    <div>
+                        <h4 class="text-sm font-semibold uppercase tracking-wider text-emerald-400 mb-4 flex items-center gap-2">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Personalized Preventive Protocol
+                        </h4>
+                        <div id="recommendationsPanel" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Dynamic Code Injection -->
+                        </div>
+                    </div>
+                    <div id="insightsPanel" class="mt-4 pt-4 border-t border-gray-800/80 grid grid-cols-2 gap-2 text-xs text-gray-400">
+                        <!-- Dynamic Content -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-800/60 bg-gray-950/80 py-4 px-8 text-center text-xs text-gray-500 mt-12">
+        <p>© 2026 Personal Environmental Health Analyzer Framework. Optimized for regional bio-health mitigation.</p>
+    </footer>
+
+    <!-- INTERACTIVE ENGINE AND ANALYTICS LOGIC -->
+    <script>
+        // MASTER CLEANED DATASET (North India - Regional Framework Focusing around Kanpur)
+        const environmentalDataset = [
+            { city: "Kanpur", aqi: 182, pm25: 112, pm10: 210, waterHardness: 340, waterTds: 420, waterQualityScore: 58 },
+            { city: "Lucknow", aqi: 165, pm25: 98, pm10: 185, waterHardness: 310, waterTds: 390, waterQualityScore: 62 },
+            { city: "Delhi-NCR", aqi: 245, pm25: 184, pm10: 310, waterHardness: 410, waterTds: 580, waterQualityScore: 45 },
+            { city: "Noida", aqi: 210, pm25: 155, pm10: 265, waterHardness: 390, waterTds: 520, waterQualityScore: 49 },
+            { city: "Agra", aqi: 155, pm25: 89, pm10: 172, waterHardness: 450, waterTds: 610, waterQualityScore: 40 },
+            { city: "Prayagraj", aqi: 120, pm25: 64, pm10: 135, waterHardness: 260, waterTds: 310, waterQualityScore: 70 },
+            { city: "Varanasi", aqi: 115, pm25: 58, pm10: 124, waterHardness: 240, waterTds: 295, waterQualityScore: 74 },
+            { city: "Dehradun", aqi: 62, pm25: 24, pm10: 68, waterHardness: 140, waterTds: 180, waterQualityScore: 88 }
+        ];
+
+        let activeRiskFilter = 'all';
+        let mainChartInstance = null;
+        let distributionChartInstance = null;
+
+        // UI Initialization Entry Point
+        document.addEventListener("DOMContentLoaded", () => {
+            populateCitySelector();
+            updateDashboard();
+        });
+
+        function populateCitySelector() {
+            const selector = document.getElementById("citySelector");
+            selector.innerHTML = environmentalDataset.map(d => `<option value="${d.city}">${d.city}</option>`).join("");
+            // Default select configured contextually to Kanpur
+            selector.value = "Kanpur";
+        }
+
+        function setRiskFilter(risk) {
+            activeRiskFilter = risk;
+            document.querySelectorAll('.risk-btn').forEach(btn => {
+                btn.className = "risk-btn text-xs py-2 px-1 rounded-lg border font-medium transition-all bg-gray-950 border-gray-800 text-gray-400 hover:bg-gray-800/50";
+            });
+            document.getElementById(`riskBtn-${risk}`).className = "risk-btn text-xs py-2 px-1 rounded-lg border font-medium transition-all bg-emerald-500/10 border-emerald-500/30 text-emerald-400";
+            updateDashboard();
+        }
+
+        function getFilteredData() {
+            if (activeRiskFilter === 'all') return environmentalDataset;
+            if (activeRiskFilter === 'moderate') return environmentalDataset.filter(d => d.aqi <= 150);
+            if (activeRiskFilter === 'high') return environmentalDataset.filter(d => d.aqi > 150);
+            return environmentalDataset;
+        }
+
+        function getAqiCategory(aqi) {
+            if (aqi <= 50) return { label: "Good", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/30", hex: "#10b981" };
+            if (aqi <= 100) return { label: "Satisfactory", color: "text-green-400", bg: "bg-green-500/10", border: "border-green-500/30", hex: "#22c55e" };
+            if (aqi <= 200) return { label: "Moderate", color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/30", hex: "#eab308" };
+            if (aqi <= 300) return { label: "Poor", color: "text-orange-400", bg: "bg-orange-500/10", border: "border-orange-500/30", hex: "#f97316" };
+            if (aqi <= 400) return { label: "Very Poor", color: "text-rose-500", bg: "bg-rose-500/10", border: "border-rose-500/30", hex: "#f43f5e" };
+            return { label: "Severe", color: "text-red-700", bg: "bg-red-700/10", border: "border-red-700/30", hex: "#b91c1c" };
+        }
+
+        function updateDashboard() {
+            const currentCityName = document.getElementById("citySelector").value;
+            const cityData = environmentalDataset.find(d => d.city === currentCityName);
+            const filteredData = getFilteredData();
+
+            // 1. STATS LOGIC
+            const totalAqi = environmentalDataset.reduce((acc, c) => acc + c.aqi, 0);
+            const avgAqi = Math.round(totalAqi / environmentalDataset.length);
+            
+            // Sort to compute anomalies and edge limits
+            const sortedByAqi = [...environmentalDataset].sort((a,b) => b.aqi - a.aqi);
+            const highestCity = sortedByAqi[0];
+            const lowestCity = sortedByAqi[sortedByAqi.length - 1];
+            
+            // Calculate Health Score for the localized area
+            const airComponent = Math.max(0, 100 - (cityData.aqi * 0.35));
+            const calculatedHealthScore = Math.round((airComponent + cityData.waterQualityScore) / 2);
+
+            document.getElementById("statAvgAqi").innerText = avgAqi;
+            document.getElementById("statMaxCity").innerText = `${highestCity.city} (${highestCity.aqi})`;
+            document.getElementById("statMinCity").innerText = `${lowestCity.city} (${lowestCity.aqi})`;
+            document.getElementById("statHealthScore").innerText = `${calculatedHealthScore}/100`;
+            document.getElementById("citiesAnalyzedCount").innerText = `${filteredData.length} Cities`;
+
+            // 2. EXECUTIVE SUMMARY 
+            document.getElementById("executiveSummaryText").innerHTML = `Analyzed baseline reveals <strong>${highestCity.city}</strong> as the absolute highest pollution node (AQI ${highestCity.aqi}), while <strong>${lowestCity.city}</strong> registers as the cleanest ecosystem. <strong>${cityData.city}</strong> presents a custom combined environmental health quotient of <strong>${calculatedHealthScore}/100</strong>, constrained heavily by systemic particulate suspension or localized water calcification parameters.`;
+
+            // 3. RENDER FOCUS CITY DETAILS CARD
+            const cat = getAqiCategory(cityData.aqi);
+            document.getElementById("cityDetailCard").innerHTML = `
+                <div class="absolute -right-8 -top-8 text-gray-800/20 text-8xl font-bold select-none z-0">
+                    <i class="fa-solid fa-tree-city"></i>
+                </div>
+                <div class="relative z-10 space-y-4">
+                    <div>
+                        <span class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Target Analytics Location</span>
+                        <h2 class="text-2xl font-bold tracking-tight text-white flex items-center gap-2 mt-0.5">
+                            <i class="fa-solid fa-location-dot text-emerald-400 text-lg"></i> ${cityData.city}
+                        </h2>
+                    </div>
+                    
+                    <div class="p-4 rounded-xl border ${cat.border} ${cat.bg} flex justify-between items-center">
+                        <div>
+                            <span class="block text-[10px] uppercase font-bold tracking-wider text-gray-400">Air Quality Index</span>
+                            <span class="text-3xl font-black tracking-tight">${cityData.aqi}</span>
+                        </div>
+                        <span class="text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-md border ${cat.border} bg-gray-950/40 ${cat.color}">
+                            ${cat.label}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-gray-950 border border-gray-800/80 p-2.5 rounded-xl">
+                            <span class="block text-gray-400 mb-0.5">PM2.5 Concentration</span>
+                            <span class="font-bold text-gray-200 text-sm">${cityData.pm25} µg/m³</span>
+                        </div>
+                        <div class="bg-gray-950 border border-gray-800/80 p-2.5 rounded-xl">
+                            <span class="block text-gray-400 mb-0.5">PM10 Concentration</span>
+                            <span class="font-bold text-gray-200 text-sm">${cityData.pm10} µg/m³</span>
+                        </div>
+                        <div class="bg-gray-950 border border-gray-800/80 p-2.5 rounded-xl">
+                            <span class="block text-gray-400 mb-0.5">Water Hardness</span>
+                            <span class="font-bold text-cyan-400 text-sm">${cityData.waterHardness} mg/L</span>
+                        </div>
+                        <div class="bg-gray-950 border border-gray-800/80 p-2.5 rounded-xl">
+                            <span class="block text-gray-400 mb-0.5">Water Total Dissolved Solids</span>
+                            <span class="font-bold text-cyan-400 text-sm">${cityData.waterTds} PPM</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 4. ENVIRONMENTAL HEALTH ANALYSIS (AIR & WATER RISK INDICATORS)
+            const airRisk = cityData.aqi > 200 ? '🔴 High' : cityData.aqi > 100 ? '🟡 Moderate' : '🟢 Low';
+            const waterRisk = cityData.waterHardness > 300 ? '🔴 High' : cityData.waterHardness > 150 ? '🟡 Moderate' : '🟢 Low';
+
+            document.getElementById("airHealthImpacts").innerHTML = `
+                <div class="flex justify-between items-start border-b border-gray-800/60 pb-2 text-xs">
+                    <div><span class="font-semibold text-gray-200 block">Pulmonary / Lung Strain</span><p class="text-gray-400">Particulate accumulation induces cellular oxidative stress.</p></div>
+                    <span class="shrink-0 font-medium">${airRisk}</span>
+                </div>
+                <div class="flex justify-between items-start border-b border-gray-800/60 pb-2 text-xs">
+                    <div><span class="font-semibold text-gray-200 block">Sleep Pattern Disruption</span><p class="text-gray-400">Micro-particulates lower REM cycle physiological efficiency.</p></div>
+                    <span class="shrink-0 font-medium">${cityData.aqi > 150 ? '🔴 High' : '🟢 Low'}</span>
+                </div>
+                <div class="flex justify-between items-start border-b border-gray-800/60 pb-2 text-xs">
+                    <div><span class="font-semibold text-gray-200 block">Cardio-Athletic Cap</span><p class="text-gray-400">Reduced $VO_2$ max efficiency under extreme aerosol density.</p></div>
+                    <span class="shrink-0 font-medium">${airRisk}</span>
+                </div>
+            `;
+
+            document.getElementById("waterHealthImpacts").innerHTML = `
+                <div class="flex justify-between items-start border-b border-gray-800/60 pb-2 text-xs">
+                    <div><span class="font-semibold text-gray-200 block">Hair Fall & Texture Loss</span><p class="text-gray-400">Heavy mineral salt scaling breaks follicular bonding proteins.</p></div>
+                    <span class="shrink-0 font-medium">${waterRisk}</span>
+                </div>
+                <div class="flex justify-between items-start border-b border-gray-800/60 pb-2 text-xs">
+                    <div><span class="font-semibold text-gray-200 block">Epidermal Dryness & Acne Flare</span><p class="text-gray-400">Alkaline mineral pH strips defensive natural skin lipids.</p></div>
+                    <span class="shrink-0 font-medium">${waterRisk}</span>
+                </div>
+                <div class="flex justify-between items-start border-b border-gray-800/60 pb-2 text-xs">
+                    <div><span class="font-semibold text-gray-200 block">Scalp Desquamation / Dandruff</span><p class="text-gray-400">High mineral concentration crystallizes on active pores.</p></div>
+                    <span class="shrink-0 font-medium">${cityData.waterHardness > 250 ? '🔴 High' : '🟢 Low'}</span>
+                </div>
+            `;
+
+            // 5. PERSONAL REPORT CARD ENGINE
+            const airScore = Math.round(Math.max(15, 100 - (cityData.aqi * 0.35)));
+            const airGrade = airScore > 85 ? 'A' : airScore > 70 ? 'B' : airScore > 55 ? 'C' : airScore > 40 ? 'D' : 'F';
+            const waterGrade = cityData.waterQualityScore > 85 ? 'A' : cityData.waterQualityScore > 70 ? 'B' : cityData.waterQualityScore > 55 ? 'C' : cityData.waterQualityScore > 40 ? 'D' : 'F';
+
+            document.getElementById("personalReportCard").innerHTML = `
+                <h4 class="text-sm font-semibold uppercase tracking-wider text-purple-400 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-id-card-clip"></i> Biometric Risk Report Card
+                </h4>
+                <div class="space-y-4">
+                    <div class="flex items-baseline justify-between">
+                        <span class="text-xs text-gray-400">Overall Bio-Score Matrix</span>
+                        <span class="text-4xl font-black text-white">${calculatedHealthScore}<span class="text-xs text-gray-500 font-normal">/100</span></span>
+                    </div>
+                    
+                    <div class="space-y-2 border-t border-gray-800/80 pt-3 text-xs">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-400">Air Bio-Metric Quotient</span>
+                            <span class="font-bold text-gray-200">${airScore}/100 (Grade ${airGrade})</span>
+                        </div>
+                        <div class="w-full bg-gray-950 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-1.5" style="width: ${airScore}%"></div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="text-gray-400">Dermal Water Quality Quotient</span>
+                            <span class="font-bold text-gray-200">${cityData.waterQualityScore}/100 (Grade ${waterGrade})</span>
+                        </div>
+                        <div class="w-full bg-gray-950 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-1.5" style="width: ${cityData.waterQualityScore}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                        <div class="bg-gray-950/60 p-2 border border-gray-800/80 rounded-xl text-center">
+                            <span class="block text-gray-400 text-[9px] uppercase font-semibold">Follicular Risk</span>
+                            <span class="font-bold ${cityData.waterHardness > 300 ? 'text-rose-400':'text-yellow-400'}">${cityData.waterHardness > 300 ? 'CRITICAL':'MODERATE'}</span>
+                        </div>
+                        <div class="bg-gray-950/60 p-2 border border-gray-800/80 rounded-xl text-center">
+                            <span class="block text-gray-400 text-[9px] uppercase font-semibold">Dermal Sensitivity</span>
+                            <span class="font-bold ${cityData.aqi > 180 ? 'text-rose-400':'text-yellow-400'}">${cityData.aqi > 180 ? 'HIGH RISK':'STABLE'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // 6. ACTION PROTOCOLS & RECOMMENDATIONS
+            let airProtocol = "Deploy HEPA filters inside active living loops; maintain indoor humidity at ~45%.";
+            let outdoorProtocol = "Reschedule cardio thresholds away from dawn/dusk micro-inversions.";
+            let dermalProtocol = "Apply a barrier cream with ceramides to protect lipids from atmospheric carbon particulates.";
+            let follicularProtocol = "A final rinse using pure drinking or RO water is highly advised to dissolve mineral crystallization.";
+
+            if(cityData.aqi > 200) {
+                airProtocol = "Activate medical-grade HEPA filters instantly. Restrict standard outward ambient ventilation.";
+                outdoorProtocol = "Strictly abandon outdoor cardiovascular regimes. Use an N95 mask for mandatory transits.";
+            }
+            if(cityData.waterHardness > 300) {
+                follicularProtocol = "Avoid raw hard water contact on hair roots. Utilize an EDTA chelating shampoo once a week.";
+            }
+
+            document.getElementById("recommendationsPanel").innerHTML = `
+                <div class="bg-gray-950/40 p-3 border border-gray-800/60 rounded-xl text-xs space-y-1">
+                    <span class="font-bold text-orange-400 flex items-center gap-1.5"><i class="fa-solid fa-house-laptop"></i> Air & Indoor Protection</span>
+                    <p class="text-gray-400 leading-relaxed">${airProtocol}</p>
+                </div>
+                <div class="bg-gray-950/40 p-3 border border-gray-800/60 rounded-xl text-xs space-y-1">
+                    <span class="font-bold text-amber-400 flex items-center gap-1.5"><i class="fa-solid fa-person-running"></i> Activity Strategy</span>
+                    <p class="text-gray-400 leading-relaxed">${outdoorProtocol}</p>
+                </div>
+                <div class="bg-gray-950/40 p-3 border border-gray-800/60 rounded-xl text-xs space-y-1">
+                    <span class="font-bold text-pink-400 flex items-center gap-1.5"><i class="fa-solid fa-pump-soap"></i> Dermal Skincare Routine</span>
+                    <p class="text-gray-400 leading-relaxed">${dermalProtocol}</p>
+                </div>
+                <div class="bg-gray-950/40 p-3 border border-gray-800/60 rounded-xl text-xs space-y-1">
+                    <span class="font-bold text-cyan-400 flex items-center gap-1.5"><i class="fa-solid fa-scissors"></i> Follicular Protective Care</span>
+                    <p class="text-gray-400 leading-relaxed">${follicularProtocol}</p>
+                </div>
+            `;
+
+            // Insights footers
+            document.getElementById("insightsPanel").innerHTML = `
+                <div><span class="text-emerald-400 font-medium">Top Safe Node:</span> ${lowestCity.city} (${lowestCity.aqi} AQI)</div>
+                <div><span class="text-rose-400 font-medium">Top Vulnerability Node:</span> ${highestCity.city} (${highestCity.aqi} AQI)</div>
+            `;
+
+            // Update associated charting interfaces
+            updateCharts();
+        }
+
+        function updateCharts() {
+            const filteredData = getFilteredData();
+            const labels = filteredData.map(d => d.city);
+            const selectedMetric = document.getElementById("pollutantSelector").value;
+            
+            let dataValues = [];
+            let datasetLabel = "";
+            let accentColor = "#10b981";
+
+            if(selectedMetric === 'aqi') {
+                dataValues = filteredData.map(d => d.aqi);
+                datasetLabel = "Air Quality Index (AQI)";
+                accentColor = "#eab308";
+            } else if (selectedMetric === 'pm25') {
+                dataValues = filteredData.map(d => d.pm25);
+                datasetLabel = "Fine Particulates PM2.5 (µg/m³)";
+                accentColor = "#f97316";
+            } else {
+                dataValues = filteredData.map(d => d.pm10);
+                datasetLabel = "Coarse Particulates PM10 (µg/m³)";
+                accentColor = "#f43f5e";
+            }
+
+            // Destruct and rebuild active charts
+            if (mainChartInstance) mainChartInstance.destroy();
+            if (distributionChartInstance) distributionChartInstance.destroy();
+
+            const ctxMain = document.getElementById('analyticsChart').getContext('2d');
+            mainChartInstance = new Chart(ctxMain, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: datasetLabel,
+                        data: dataValues,
+                        backgroundColor: accentColor + "22",
+                        borderColor: accentColor,
+                        borderWidth: 2,
+                        borderRadius: 6,
+                        hoverBackgroundColor: accentColor + "55"
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: { grid: { color: '#1f2937' }, ticks: { color: '#9ca3af' } },
+                        x: { grid: { display: false }, ticks: { color: '#9ca3af' } }
+                    }
+                }
+            });
+
+            // Stratification doughnut rendering logic
+            const goodCount = filteredData.filter(d => d.aqi <= 100).length;
+            const modCount = filteredData.filter(d => d.aqi > 100 && d.aqi <= 200).length;
+            const criticalCount = filteredData.filter(d => d.aqi > 200).length;
+
+            const ctxDist = document.getElementById('distributionChart').getContext('2d');
+            distributionChartInstance = new Chart(ctxDist, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Stable (<=100)', 'Moderate (101-200)', 'Critical (>200)'],
+                    datasets: [{
+                        data: [goodCount, modCount, criticalCount],
+                        backgroundColor: ['#10b981', '#eab308', '#f43f5e'],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: { color: '#9ca3af', boxWidth: 12, font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function shareToLinkedIn() {
+            const cityName = document.getElementById("citySelector").value;
+            const message = encodeURIComponent(`Evaluating my personal bio-environmental health status for ${cityName} using the Environmental Health Analyzer Framework. Check out your environmental parameters!`);
+            window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${message}`, '_blank');
+        }
+    </script>
+</body>
+</html>
