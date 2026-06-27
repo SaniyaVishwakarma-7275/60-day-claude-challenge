@@ -1,0 +1,28 @@
+# Day 13: Job Market Analysis & Skill-Gap Assessment
+
+## 🔍 Discovered Opportunities & Match Scores
+Aapko Claude aur Indeed Connector se jo jobs mili hain, unhe yahan table me add karein:
+
+| Job Title | Company | Location | Match Score | Key Requirements |
+| :--- | :--- | :--- | :--- | :--- |
+| Android Developer Intern | [Company Name] | Remote / Noida | 85% | Kotlin, Jetpack Compose, MVVM |
+| Junior Backend Engineer | [Company Name] | Kanpur / Bangalore | 75% | Node.js, MySQL, REST APIs |
+| Full Stack Web Developer | [Company Name] | Delhi-NCR | 80% | React, Node.js, Database Management |
+
+---
+
+## 📊 Skill-Gap Analysis & Market Demand Insights
+
+### 1. Market Demand Insights
+* **High Demand Skills:** Native Android Development (Kotlin/Compose), Robust Backend Architecture (Node.js, Express), State Management, and API Integration.
+* **Industry Trends:** Companies are heavily looking for developers who understand both frontend UI design patterns and efficient database scaling.
+
+### 2. Identified Skill Gaps
+* **Technical Gaps:** Need to deepen understanding of Advanced Data Structures (DSA) for optimization and advanced system design concepts.
+* **Tools/Libraries:** Working with automated testing frameworks and cloud deployment (like AWS/Heroku) for backend services.
+
+---
+
+## 💡 Key Learnings
+* **AI-Driven Job Search:** Learnt how to leverage AI tools like Claude with active integrations (Indeed Connector) to filter precise job roles matching a specific developer profile.
+* **Targeted Preparation:** Realized the importance of continuous skill mapping against live market data to stay relevant in the changing tech landscape.
